@@ -64,7 +64,7 @@ namespace CG_Сourse_Work
             };
         }
 
-        public static Matrix CreateViewportMatrix(int x, int y, int w, int h, int depth = 255)
+        public static Matrix CreateViewportMatrix(double x, double y, double w, double h, double depth)
         {
             return new Matrix
             {
