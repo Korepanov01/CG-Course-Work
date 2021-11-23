@@ -26,7 +26,7 @@ namespace CG_Сourse_Work
 
         private double Length { get; }
 
-        public Vector()
+        private Vector()
         {
         }
 

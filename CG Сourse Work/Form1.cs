@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -10,23 +11,70 @@ namespace CG_Сourse_Work
     {
         private const string ModelFileName = "cat.obj";
 
-        private readonly List<Vector[]> _model = new List<Vector[]>();
+        private readonly List<Vector[]> _originalModel = new List<Vector[]>();
+        private List<Vector[]> _transformedModel = new List<Vector[]>();
+
+        private Matrix _transformationMatrix;
+
+        private int _rotationAngle = 0;
 
         public Form1()
         {
             InitializeComponent();
+            BackColor = Color.Aqua;
             ReadModel(ModelFileName);
+            _transformationMatrix = CreateTransformMatrix();
+            
             KeyDown += OnKeyDown;
             Paint += OnPaint;
+        }
 
-            Width = 1000;
-            Height = 1000;
+        private void TransformModel(Matrix transformationMatrix)
+        {
+            _transformedModel = _originalModel.Select(vectors => new[]
+                {
+                    transformationMatrix * vectors[0],
+                    transformationMatrix * vectors[1],
+                    transformationMatrix * vectors[2]
+                })
+                .OrderBy(vectors => vectors[0].Z + vectors[1].Z + vectors[2].Z).ToList();
         }
 
         private void OnPaint(object sender, PaintEventArgs e)
         {
             var graphics = e.Graphics;
-            DrawModel(graphics, CreateTransformMatrix());
+            RotateModel(Matrix.CreateYRotationMatrix(_rotationAngle));
+            DrawModel(graphics);
+        }
+
+        private void RotateModel(Matrix rotationMatrix)
+        {
+            _transformedModel = _originalModel.Select(vectors => new[]
+                {
+                    _transformationMatrix * rotationMatrix * vectors[0],
+                    _transformationMatrix * rotationMatrix * vectors[1],
+                    _transformationMatrix * rotationMatrix * vectors[2]
+                })
+                .OrderBy(vectors => vectors[0].Z + vectors[1].Z + vectors[2].Z).ToList();
+
+        }
+
+        private void OnKeyDown(object sender, KeyEventArgs e)
+        {
+            switch (e.KeyCode)
+            {
+                case Keys.Escape:
+                    Close();
+                    break;
+                case Keys.Right:
+                    _rotationAngle += 10;
+                    Refresh();
+                    break;
+                case Keys.Left:
+                    _rotationAngle -= 10;
+                    Refresh();
+                    break;
+            }
         }
 
         private void ReadModel(string fileName)
@@ -47,47 +95,34 @@ namespace CG_Сourse_Work
                     var secondPointIndex = int.Parse(words[2].Split('/')[0]) - 1;
                     var thirdPointIndex = int.Parse(words[3].Split('/')[0]) - 1;
 
-                    _model.Add(new[]
+                    _originalModel.Add(new[]
                         {vectors[firstPointIndex], vectors[secondPointIndex], vectors[thirdPointIndex]});
                 }
             }
         }
 
-        private void OnKeyDown(object sender, KeyEventArgs e)
-        {
-            switch (e.KeyCode)
-            {
-                case Keys.Escape:
-                    Close();
-                    break;
-                case Keys.Right:
-                    Refresh();
-                    break;
-                case Keys.Left:
-                    Refresh();
-                    break;
-            }
-        }
-
         private Matrix CreateTransformMatrix()
         {
-            return Matrix.CreateUnitMatrix();
+            var minX = _originalModel.Min(polygon => polygon.Min(vector => vector.X));
+            var maxX = _originalModel.Max(polygon => polygon.Max(vector => vector.X));
+            var minY = _originalModel.Min(polygon => polygon.Min(vector => vector.Y));
+            var maxY = _originalModel.Max(polygon => polygon.Max(vector => vector.Y));
+            var minZ = _originalModel.Min(polygon => polygon.Min(vector => vector.Z));
+            var maxZ = _originalModel.Max(polygon => polygon.Max(vector => vector.Z));
+
+            var viewportMatrix = Matrix.CreateViewportMatrix(0, 0, Width, Height, maxZ - minZ);
+
+            var projectionMatrix = Matrix.CreateProjectionMatrix(minX, maxX, minY, maxY, maxZ, minZ);
+
+            return viewportMatrix * projectionMatrix;
         }
 
-        private void DrawModel(Graphics graphics, Matrix transformationMatrix)
+        private void DrawModel(Graphics graphics)
         {
-            var colorStep = 1.0 / (_model.Count + 100);
+            var colorStep = 1.0 / (_transformedModel.Count + 100);
             var currentColor = colorStep * 50;
             
-            var newModel = _model.Select(vectors => new[]
-                {
-                    transformationMatrix * vectors[0],
-                    transformationMatrix * vectors[1],
-                    transformationMatrix * vectors[2]
-                })
-                .OrderBy(vectors => vectors[0].Z + vectors[1].Z + vectors[2].Z).ToList();
-
-            foreach (var vectors in newModel)
+            foreach (var vectors in _transformedModel)
             {
                 var points = new[]
                 {
