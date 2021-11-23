@@ -1,6 +1,6 @@
 ﻿namespace CG_Сourse_Work
 {
-    partial class Form1
+    sealed partial class Form1
     {
         /// <summary>
         /// Required designer variable.

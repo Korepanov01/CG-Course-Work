@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -7,37 +6,28 @@ using System.Windows.Forms;
 
 namespace CG_Сourse_Work
 {
-    public partial class Form1 : Form
+    public sealed partial class Form1 : Form
     {
         private const string ModelFileName = "cat.obj";
 
         private readonly List<Vector[]> _originalModel = new List<Vector[]>();
         private List<Vector[]> _transformedModel = new List<Vector[]>();
 
-        private Matrix _transformationMatrix;
+        private readonly Matrix _transformationMatrix;
 
-        private int _rotationAngle = 0;
+        private int _rotationAngle;
 
         public Form1()
         {
             InitializeComponent();
+            Width = 1000;
+            Height = 500;
             BackColor = Color.Aqua;
             ReadModel(ModelFileName);
             _transformationMatrix = CreateTransformMatrix();
             
             KeyDown += OnKeyDown;
             Paint += OnPaint;
-        }
-
-        private void TransformModel(Matrix transformationMatrix)
-        {
-            _transformedModel = _originalModel.Select(vectors => new[]
-                {
-                    transformationMatrix * vectors[0],
-                    transformationMatrix * vectors[1],
-                    transformationMatrix * vectors[2]
-                })
-                .OrderBy(vectors => vectors[0].Z + vectors[1].Z + vectors[2].Z).ToList();
         }
 
         private void OnPaint(object sender, PaintEventArgs e)
@@ -56,7 +46,6 @@ namespace CG_Сourse_Work
                     _transformationMatrix * rotationMatrix * vectors[2]
                 })
                 .OrderBy(vectors => vectors[0].Z + vectors[1].Z + vectors[2].Z).ToList();
-
         }
 
         private void OnKeyDown(object sender, KeyEventArgs e)
@@ -110,7 +99,7 @@ namespace CG_Сourse_Work
             var minZ = _originalModel.Min(polygon => polygon.Min(vector => vector.Z));
             var maxZ = _originalModel.Max(polygon => polygon.Max(vector => vector.Z));
 
-            var viewportMatrix = Matrix.CreateViewportMatrix(0, 0, Width, Height, maxZ - minZ);
+            var viewportMatrix = Matrix.CreateViewportMatrix(-50, 0, Width, Height, maxZ - minZ);
 
             var projectionMatrix = Matrix.CreateProjectionMatrix(minX, maxX, minY, maxY, maxZ, minZ);
 
