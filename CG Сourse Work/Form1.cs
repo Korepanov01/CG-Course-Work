@@ -21,7 +21,7 @@ namespace CG_Сourse_Work
         {
             InitializeComponent();
             Width = 1000;
-            Height = 500;
+            Height = 600;
             BackColor = Color.Aqua;
             ReadModel(ModelFileName);
             _transformationMatrix = CreateTransformMatrix();
@@ -99,11 +99,18 @@ namespace CG_Сourse_Work
             var minZ = _originalModel.Min(polygon => polygon.Min(vector => vector.Z));
             var maxZ = _originalModel.Max(polygon => polygon.Max(vector => vector.Z));
 
-            var viewportMatrix = Matrix.CreateViewportMatrix(-50, 0, Width, Height, maxZ - minZ);
+            var viewportMatrix = Matrix.CreateViewportMatrix(-50, -50, Width, Height, maxZ - minZ);
 
             var projectionMatrix = Matrix.CreateProjectionMatrix(minX, maxX, minY, maxY, maxZ, minZ);
 
-            return viewportMatrix * projectionMatrix;
+            var cameraPosition = new Vector( 0.6,  0.6,  0.6);
+            var center = new Vector(0,0,0);
+            var z = cameraPosition - center;
+            var x = Vector.ScalarMultiplication(new Vector(0,1,0), z);
+            var y = Vector.ScalarMultiplication(z, x);
+            var lookAtMatrix = Matrix.CreateLookAtMatrix(x,y,z, cameraPosition);
+
+            return viewportMatrix * projectionMatrix * lookAtMatrix;
         }
 
         private void DrawModel(Graphics graphics)
