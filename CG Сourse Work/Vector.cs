@@ -4,7 +4,7 @@ namespace CG_Сourse_Work
 {
     public class Vector
     {
-        private readonly double[] _array = new double[3];
+        private readonly double[] _array = { 0, 0, 0, 1};
 
         public double X
         {
@@ -26,7 +26,7 @@ namespace CG_Сourse_Work
 
         private double Length { get; }
 
-        public Vector()
+        private Vector()
         {
         }
 
