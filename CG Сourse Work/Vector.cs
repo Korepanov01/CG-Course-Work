@@ -4,7 +4,7 @@ namespace CG_Сourse_Work
 {
     public class Vector
     {
-        private readonly double[] _array = { 0, 0, 0, 1};
+        private readonly double[] _array = {0, 0, 0, 1};
 
         public double X
         {
@@ -57,21 +57,21 @@ namespace CG_Сourse_Work
         public static Vector operator -(Vector firstVector, Vector secondVector)
         {
             return new Vector
-            {
-                X = firstVector.X - secondVector.X,
-                Y = firstVector.Y - secondVector.Y,
-                Z = firstVector.Z - secondVector.Z
-            };
+            (
+                firstVector.X - secondVector.X,
+                firstVector.Y - secondVector.Y,
+                firstVector.Z - secondVector.Z
+            );
         }
 
         public static Vector operator +(Vector firstVector, Vector secondVector)
         {
             return new Vector
-            {
-                X = firstVector.X + secondVector.X,
-                Y = firstVector.Y + secondVector.Y,
-                Z = firstVector.Z + secondVector.Z
-            };
+            (
+                firstVector.X + secondVector.X,
+                firstVector.Y + secondVector.Y,
+                firstVector.Z + secondVector.Z
+            );
         }
 
         public static Vector operator *(Matrix matrix, Vector vector)

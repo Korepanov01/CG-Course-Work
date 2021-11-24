@@ -115,41 +115,41 @@ namespace CG_Сourse_Work
             };
         }
 
-        // public static Matrix CreateShiftMatrix(double tx, double ty, double tz)
-        // {
-        //     return new Matrix
-        //     {
-        //         [0, 0] = 1,
-        //         [1, 1] = 1,
-        //         [2, 2] = 1,
-        //         [3, 3] = 1,
-        //
-        //         [0, 3] = tx,
-        //         [1, 3] = ty,
-        //         [2, 3] = tz
-        //     };
-        // }
-        //
-        // public static Matrix CreateScaleMatrix(double kx, double ky, double kz)
-        // {
-        //     return new Matrix
-        //     {
-        //         [0, 0] = kx,
-        //         [1, 1] = ky,
-        //         [2, 2] = kz,
-        //         [3, 3] = 1
-        //     };
-        // }
-        //
-        // public static Matrix CreateScaleMatrix(double k)
-        // {
-        //     return new Matrix
-        //     {
-        //         [0, 0] = 1,
-        //         [1, 1] = 1,
-        //         [2, 2] = 1,
-        //         [3, 3] = k
-        //     };
-        // }
+        public static Matrix CreateShiftMatrix(double tx, double ty, double tz)
+        {
+            return new Matrix
+            {
+                [0, 0] = 1,
+                [1, 1] = 1,
+                [2, 2] = 1,
+                [3, 3] = 1,
+
+                [0, 3] = tx,
+                [1, 3] = ty,
+                [2, 3] = tz
+            };
+        }
+
+        public static Matrix CreateScaleMatrix(double kx, double ky, double kz)
+        {
+            return new Matrix
+            {
+                [0, 0] = kx,
+                [1, 1] = ky,
+                [2, 2] = kz,
+                [3, 3] = 1
+            };
+        }
+
+        public static Matrix CreateScaleMatrix(double k)
+        {
+            return new Matrix
+            {
+                [0, 0] = k,
+                [1, 1] = k,
+                [2, 2] = k,
+                [3, 3] = 1
+            };
+        }
     }
 }
