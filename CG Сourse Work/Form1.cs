@@ -20,11 +20,11 @@ namespace CG_Сourse_Work
         public Form1()
         {
             InitializeComponent();
-            
+
             Width = 1200;
             Height = 800;
-            BackColor = Color.Aqua;
-            
+            BackColor = Color.AntiqueWhite;
+
             ReadModelPolygons();
             FillTransformMatrix();
 
@@ -41,7 +41,7 @@ namespace CG_Сourse_Work
         private void TransformModel()
         {
             var rotationMatrix = Matrix.CreateYRotationMatrix(_rotationAngle);
-            
+
             _transformedModelPolygons = _originalModelPolygons.Select(vectors => new[]
                 {
                     _transformationMatrix * rotationMatrix * vectors[0],
@@ -100,26 +100,26 @@ namespace CG_Сourse_Work
             var minZ = _originalModelPolygons.Min(polygon => polygon.Min(vector => vector.Z));
             var maxZ = _originalModelPolygons.Max(polygon => polygon.Max(vector => vector.Z));
 
-            var viewportMatrix = Matrix.CreateViewportMatrix(-170, -200, Width, Height, maxZ - minZ);
+            var viewportMatrix = Matrix.CreateViewportMatrix(-170, -150, Width, Height, maxZ - minZ);
 
             var projectionMatrix = Matrix.CreateProjectionMatrix(minX, maxX, minY, maxY, maxZ, minZ);
 
-            var cameraPosition = new Vector(0.6, 0.6, 0.6);
+            var cameraPosition = new Vector(0.4, 0.4, 1);
             var center = new Vector(0, 0, 0);
             var z = cameraPosition - center;
             var x = Vector.ScalarMultiplication(new Vector(0, 1, 0), z);
             var y = Vector.ScalarMultiplication(z, x);
             var lookAtMatrix = Matrix.CreateLookAtMatrix(x, y, z, cameraPosition);
 
-            var scaleMatrix = Matrix.CreateScaleMatrix(0.6, 0.6, 0.8);
-            
+            var scaleMatrix = Matrix.CreateScaleMatrix(0.6, 0.5, 0.8);
+
             _transformationMatrix = viewportMatrix * projectionMatrix * lookAtMatrix * scaleMatrix;
         }
 
         private void DrawModel(Graphics graphics)
         {
-            var colorStep = 1.0 / (_transformedModelPolygons.Count + 100);
-            var currentColor = colorStep * 50;
+            var colorCoefficientStep = 1.0 / (_transformedModelPolygons.Count + 2000);
+            var colorCoefficient = colorCoefficientStep * 1950;
 
             foreach (var vectors in _transformedModelPolygons)
             {
@@ -130,9 +130,10 @@ namespace CG_Сourse_Work
                     new Point((int) vectors[2].X, (int) vectors[2].Y)
                 };
 
-                currentColor += colorStep;
-                var currentRgb = (int) (255 * currentColor);
-                var brush = new SolidBrush(Color.FromArgb(currentRgb, currentRgb, currentRgb));
+                colorCoefficient += colorCoefficientStep;
+                var brush = new SolidBrush(Color.FromArgb((int) (255 * colorCoefficient),
+                    (int) (255 * colorCoefficient),
+                    (int) (255 * colorCoefficient)));
                 graphics.FillPolygon(brush, points);
             }
         }
