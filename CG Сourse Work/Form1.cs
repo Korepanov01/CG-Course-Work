@@ -10,36 +10,39 @@ namespace CG_Сourse_Work
     {
         private const string ModelFileName = "cat.obj";
 
-        private readonly List<Vector[]> _originalModel = new List<Vector[]>();
-        private List<Vector[]> _transformedModel = new List<Vector[]>();
+        private readonly List<Vector[]> _originalModelPolygons = new List<Vector[]>();
+        private List<Vector[]> _transformedModelPolygons = new List<Vector[]>();
 
-        private readonly Matrix _transformationMatrix;
+        private Matrix _transformationMatrix;
 
         private int _rotationAngle;
 
         public Form1()
         {
             InitializeComponent();
-            Width = 1000;
-            Height = 600;
-            BackColor = Color.Aqua;
-            ReadModel(ModelFileName);
-            _transformationMatrix = CreateTransformMatrix();
             
+            Width = 1200;
+            Height = 800;
+            BackColor = Color.Aqua;
+            
+            ReadModelPolygons();
+            FillTransformMatrix();
+
             KeyDown += OnKeyDown;
             Paint += OnPaint;
         }
 
         private void OnPaint(object sender, PaintEventArgs e)
         {
-            var graphics = e.Graphics;
-            RotateModel(Matrix.CreateYRotationMatrix(_rotationAngle));
-            DrawModel(graphics);
+            TransformModel();
+            DrawModel(e.Graphics);
         }
 
-        private void RotateModel(Matrix rotationMatrix)
+        private void TransformModel()
         {
-            _transformedModel = _originalModel.Select(vectors => new[]
+            var rotationMatrix = Matrix.CreateYRotationMatrix(_rotationAngle);
+            
+            _transformedModelPolygons = _originalModelPolygons.Select(vectors => new[]
                 {
                     _transformationMatrix * rotationMatrix * vectors[0],
                     _transformationMatrix * rotationMatrix * vectors[1],
@@ -56,22 +59,20 @@ namespace CG_Сourse_Work
                     Close();
                     break;
                 case Keys.Right:
-                    _rotationAngle += 10;
+                    _rotationAngle -= 10;
                     Refresh();
                     break;
                 case Keys.Left:
-                    _rotationAngle -= 10;
+                    _rotationAngle += 10;
                     Refresh();
                     break;
             }
         }
 
-        private void ReadModel(string fileName)
+        private void ReadModelPolygons()
         {
-            var lines = File.ReadAllLines(fileName);
-
             var vectors = new List<Vector>();
-            foreach (var line in lines)
+            foreach (var line in File.ReadAllLines(ModelFileName))
             {
                 var words = line.Replace('.', ',').Split(' ');
                 if (words[0] == "v")
@@ -84,41 +85,43 @@ namespace CG_Сourse_Work
                     var secondPointIndex = int.Parse(words[2].Split('/')[0]) - 1;
                     var thirdPointIndex = int.Parse(words[3].Split('/')[0]) - 1;
 
-                    _originalModel.Add(new[]
+                    _originalModelPolygons.Add(new[]
                         {vectors[firstPointIndex], vectors[secondPointIndex], vectors[thirdPointIndex]});
                 }
             }
         }
 
-        private Matrix CreateTransformMatrix()
+        private void FillTransformMatrix()
         {
-            var minX = _originalModel.Min(polygon => polygon.Min(vector => vector.X));
-            var maxX = _originalModel.Max(polygon => polygon.Max(vector => vector.X));
-            var minY = _originalModel.Min(polygon => polygon.Min(vector => vector.Y));
-            var maxY = _originalModel.Max(polygon => polygon.Max(vector => vector.Y));
-            var minZ = _originalModel.Min(polygon => polygon.Min(vector => vector.Z));
-            var maxZ = _originalModel.Max(polygon => polygon.Max(vector => vector.Z));
+            var minX = _originalModelPolygons.Min(polygon => polygon.Min(vector => vector.X));
+            var maxX = _originalModelPolygons.Max(polygon => polygon.Max(vector => vector.X));
+            var minY = _originalModelPolygons.Min(polygon => polygon.Min(vector => vector.Y));
+            var maxY = _originalModelPolygons.Max(polygon => polygon.Max(vector => vector.Y));
+            var minZ = _originalModelPolygons.Min(polygon => polygon.Min(vector => vector.Z));
+            var maxZ = _originalModelPolygons.Max(polygon => polygon.Max(vector => vector.Z));
 
-            var viewportMatrix = Matrix.CreateViewportMatrix(-50, -50, Width, Height, maxZ - minZ);
+            var viewportMatrix = Matrix.CreateViewportMatrix(-170, -200, Width, Height, maxZ - minZ);
 
             var projectionMatrix = Matrix.CreateProjectionMatrix(minX, maxX, minY, maxY, maxZ, minZ);
 
-            var cameraPosition = new Vector( 0.6,  0.6,  0.6);
-            var center = new Vector(0,0,0);
+            var cameraPosition = new Vector(0.6, 0.6, 0.6);
+            var center = new Vector(0, 0, 0);
             var z = cameraPosition - center;
-            var x = Vector.ScalarMultiplication(new Vector(0,1,0), z);
+            var x = Vector.ScalarMultiplication(new Vector(0, 1, 0), z);
             var y = Vector.ScalarMultiplication(z, x);
-            var lookAtMatrix = Matrix.CreateLookAtMatrix(x,y,z, cameraPosition);
+            var lookAtMatrix = Matrix.CreateLookAtMatrix(x, y, z, cameraPosition);
 
-            return viewportMatrix * projectionMatrix * lookAtMatrix;
+            var scaleMatrix = Matrix.CreateScaleMatrix(0.6, 0.6, 0.8);
+            
+            _transformationMatrix = viewportMatrix * projectionMatrix * lookAtMatrix * scaleMatrix;
         }
 
         private void DrawModel(Graphics graphics)
         {
-            var colorStep = 1.0 / (_transformedModel.Count + 100);
+            var colorStep = 1.0 / (_transformedModelPolygons.Count + 100);
             var currentColor = colorStep * 50;
-            
-            foreach (var vectors in _transformedModel)
+
+            foreach (var vectors in _transformedModelPolygons)
             {
                 var points = new[]
                 {
