@@ -44,16 +44,6 @@ namespace CG_Сourse_Work
             set => _array[i] = value;
         }
 
-        public Vector Normalized()
-        {
-            if (Length == 0)
-            {
-                return new Vector();
-            }
-
-            return new Vector(X / Length, Y / Length, Z / Length);
-        }
-
         public static Vector operator -(Vector firstVector, Vector secondVector)
         {
             return new Vector
