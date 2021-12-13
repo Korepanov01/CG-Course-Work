@@ -100,18 +100,18 @@ namespace CG_Сourse_Work
             var minZ = _originalModelPolygons.Min(polygon => polygon.Min(vector => vector.Z));
             var maxZ = _originalModelPolygons.Max(polygon => polygon.Max(vector => vector.Z));
 
-            var viewportMatrix = Matrix.CreateViewportMatrix(-170, -150, Width, Height, maxZ - minZ);
+            var viewportMatrix = Matrix.CreateViewportMatrix(-170, -200, Width, Height, maxZ - minZ);
 
             var projectionMatrix = Matrix.CreateProjectionMatrix(minX, maxX, minY, maxY, maxZ, minZ);
 
-            var cameraPosition = new Vector(0.4, 0.4, 1);
+            var cameraPosition = new Vector(0.35, 0.35, 1);
             var center = new Vector(0, 0, 0);
             var z = cameraPosition - center;
             var x = Vector.ScalarMultiplication(new Vector(0, 1, 0), z);
             var y = Vector.ScalarMultiplication(z, x);
             var lookAtMatrix = Matrix.CreateLookAtMatrix(x, y, z, cameraPosition);
 
-            var scaleMatrix = Matrix.CreateScaleMatrix(0.6, 0.5, 0.8);
+            var scaleMatrix = Matrix.CreateScaleMatrix(0.6, 0.4, 0.8);
 
             _transformationMatrix = viewportMatrix * projectionMatrix * lookAtMatrix * scaleMatrix;
         }
